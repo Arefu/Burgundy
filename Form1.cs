@@ -102,7 +102,7 @@ namespace Burgundy
 
         private void Process_Click(object sender, EventArgs e)
         {
-            Dictionary<Class, Student> MissingEfforts = new Dictionary<Class, Student>();
+            Dictionary<Student, Class> MissingEfforts = new Dictionary<Student, Class>();
 
             if (StudentTimetables.Count != StudentEfforts.Count || StudentTimetables[0].StudentID != StudentEfforts[0].StudentID)
             {
@@ -127,10 +127,10 @@ namespace Burgundy
                     if (Subject.SubjectName == StudentEfforts[Student].StudentFormClass)
                         continue;
 
-                    var Missed = StudentTimetables[Student].Week.Days.Where(Day => Day.Classes.Any(Class => Class.Name == Subject.SubjectName));
-                    foreach(var Miss in Missed)
-                        foreach(var Class in Miss.Classes)
-                            Log($"Missed {Class.Name} By {Class.Teacher} Student {StudentEfforts[Student].FirstName} {StudentEfforts[Student].Surname}\n");
+                    var DaysWithNoEfforts = StudentTimetables[Student].Week.Days.Where(Day => Day.Classes.Any(Class => Class.Name == Subject.SubjectName));
+                    foreach(Day Day in DaysWithNoEfforts)
+                        foreach(Class Class in Day.Classes)
+                            MissingEfforts.Add(Class, StudentTimetables[Student])
                 }
             }
         }
