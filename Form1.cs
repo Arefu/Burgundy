@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,7 +16,7 @@ namespace Burgundy
     {
         internal static List<Timetable> StudentTimetables;
         internal static List<Student> StudentEfforts;
-
+        
         public Form1()
         {
             InitializeComponent();
@@ -101,6 +102,8 @@ namespace Burgundy
 
         private void Process_Click(object sender, EventArgs e)
         {
+            Dictionary<Class, Student> MissingEfforts = new Dictionary<Class, Student>();
+
             if (StudentTimetables.Count != StudentEfforts.Count || StudentTimetables[0].StudentID != StudentEfforts[0].StudentID)
             {
                 var Result = MessageBox.Show("The Student TimeTables & Student Efforts Don't Match, I Can Continue, But Things May Get Weird, Is That Okay?\n\nPlease Tell Johnathon!", "Offset Mismatch", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -121,12 +124,13 @@ namespace Burgundy
                     //Class Has Effort, We're Looking For Ones That Don't
                     if (Subject.SubjectEffort1 != 0)
                         continue;
+                    if (Subject.SubjectName == StudentEfforts[Student].StudentFormClass)
+                        continue;
 
-                    if(StudentTimetables[Student].Monday.P1.Name == Subject.SubjectName)
-                    {
-
-                    }
-
+                    var Missed = StudentTimetables[Student].Week.Days.Where(Day => Day.Classes.Any(Class => Class.Name == Subject.SubjectName));
+                    foreach(var Miss in Missed)
+                        foreach(var Class in Miss.Classes)
+                            Log($"Missed {Class.Name} By {Class.Teacher} Student {StudentEfforts[Student].FirstName} {StudentEfforts[Student].Surname}\n");
                 }
             }
         }

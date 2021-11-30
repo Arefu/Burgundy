@@ -26,15 +26,25 @@ namespace Burgundy
         }
     }
 
+    internal class Week
+    {
+        internal List<Day> Days = new List<Day>();
+
+        internal void AddDay(Day Day)
+        {
+            Days.Add(Day);
+        }
+    }
+
     internal class Day
     {
-        internal Class P1;
-        internal Class P2;
-        internal Class P3;
-        internal Class P4;
-        internal Class P5;
+        //Maybe Add Char To What Class Is If Needed?
+        internal List<Class> Classes = new List<Class>();
 
-        internal Class WhaWhanau;
+        internal void AddClass(Class Class)
+        {
+            this.Classes.Add(Class);
+        }
     }
 
     internal class Timetable
@@ -48,11 +58,15 @@ namespace Burgundy
         internal string Grid1;
         internal string Grid2;
 
+        internal Week Week = new Week();
+
         internal Day Monday = new Day();
         internal Day Tuesday = new Day();
         internal Day Wednesday = new Day();
         internal Day Thursday = new Day();
         internal Day Friday = new Day();
+
+        internal List<Subject> Subjects = new List<Subject>();
 
         internal Timetable(List<string> Data)
         {
@@ -68,40 +82,46 @@ namespace Burgundy
             this.Grid1 = Data[6];
             this.Grid2 = Data[7];
 
-            this.Monday.P1 = new Class(Data[8]);
-            this.Monday.P2 = new Class(Data[9]);
-            this.Monday.P3 = new Class(Data[11]);
-            this.Monday.WhaWhanau = new Class(Data[12]);
-            this.Monday.P4 = new Class(Data[13]);
-            this.Monday.P5 = new Class(Data[15]);
+            this.Monday.AddClass(new Class(Data[8]));
+            this.Monday.AddClass(new Class(Data[9]));
+            this.Monday.AddClass(new Class(Data[11]));
+            this.Monday.AddClass(new Class(Data[12]));
+            this.Monday.AddClass(new Class(Data[13]));
+            this.Monday.AddClass(new Class(Data[15]));
 
-            this.Tuesday.P1 = new Class(Data[18]);
-            this.Tuesday.P2 = new Class(Data[19]);
-            this.Tuesday.P3 = new Class(Data[21]);
-            this.Tuesday.WhaWhanau = new Class(Data[22]);
-            this.Tuesday.P4 = new Class(Data[23]);
-            this.Tuesday.P5 = new Class(Data[25]);
+            this.Tuesday.AddClass(new Class(Data[18]));
+            this.Tuesday.AddClass(new Class(Data[19]));
+            this.Tuesday.AddClass(new Class(Data[21]));
+            this.Tuesday.AddClass(new Class(Data[22]));
+            this.Tuesday.AddClass(new Class(Data[23]));
+            this.Tuesday.AddClass(new Class(Data[25]));
 
-            this.Wednesday.P1 = new Class(Data[28]);
-            this.Wednesday.P2 = new Class(Data[29]);
-            this.Wednesday.P3 = new Class(Data[31]);
-            this.Wednesday.WhaWhanau = new Class(Data[32]);
-            this.Wednesday.P4 = new Class(Data[33]);
-            this.Wednesday.P5 = new Class(Data[35]);
+            this.Wednesday.AddClass(new Class(Data[28]));
+            this.Wednesday.AddClass(new Class(Data[29]));
+            this.Wednesday.AddClass(new Class(Data[31]));
+            this.Wednesday.AddClass(new Class(Data[32]));
+            this.Wednesday.AddClass(new Class(Data[33]));
+            this.Wednesday.AddClass(new Class(Data[35]));
 
-            this.Thursday.P1 = new Class(Data[38]);
-            this.Thursday.P2 = new Class(Data[39]);
-            this.Thursday.P3 = new Class(Data[41]);
-            this.Thursday.WhaWhanau = new Class(Data[42]);
-            this.Thursday.P4 = new Class(Data[43]);
-            this.Thursday.P5 = new Class(Data[45]);
+            this.Thursday.AddClass(new Class(Data[38]));
+            this.Thursday.AddClass(new Class(Data[39]));
+            this.Thursday.AddClass(new Class(Data[41]));
+            this.Thursday.AddClass(new Class(Data[42]));
+            this.Thursday.AddClass(new Class(Data[43]));
+            this.Thursday.AddClass(new Class(Data[45]));
             
-            this.Friday.P1 = new Class(Data[48]);
-            this.Friday.P2 = new Class(Data[49]);
-            this.Friday.P3 = new Class(Data[51]);
-            this.Friday.WhaWhanau = new Class(Data[52]);
-            this.Friday.P4 = new Class(Data[53]);
-            this.Friday.P5 = new Class(Data[55]);
+            this.Friday.AddClass(new Class(Data[48]));
+            this.Friday.AddClass(new Class(Data[49]));
+            this.Friday.AddClass(new Class(Data[51]));
+            this.Friday.AddClass(new Class(Data[52]));
+            this.Friday.AddClass(new Class(Data[53]));
+            this.Friday.AddClass(new Class(Data[55]));
+
+            this.Week.AddDay(Monday);
+            this.Week.AddDay(Tuesday);
+            this.Week.AddDay(Wednesday);
+            this.Week.AddDay(Thursday);
+            this.Week.AddDay(Friday);
         }
     }
 }
