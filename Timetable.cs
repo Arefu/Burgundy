@@ -60,13 +60,11 @@ namespace Burgundy
 
         internal Week Week = new Week();
 
-        internal Day Monday = new Day();
-        internal Day Tuesday = new Day();
-        internal Day Wednesday = new Day();
-        internal Day Thursday = new Day();
-        internal Day Friday = new Day();
-
-        internal List<Subject> Subjects = new List<Subject>();
+        private Day Monday = new Day();
+        private Day Tuesday = new Day();
+        private Day Wednesday = new Day();
+        private Day Thursday = new Day();
+        private Day Friday = new Day();
 
         internal Timetable(List<string> Data)
         {

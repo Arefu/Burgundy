@@ -16,7 +16,7 @@ namespace Burgundy
     {
         internal static List<Timetable> StudentTimetables;
         internal static List<Student> StudentEfforts;
-        
+
         public Form1()
         {
             InitializeComponent();
@@ -102,42 +102,50 @@ namespace Burgundy
 
         private void Process_Click(object sender, EventArgs e)
         {
-            Dictionary<Student, Class> MissingEfforts = new Dictionary<Student, Class>();
-
+            Dictionary<Class, int> ClassesWithNoEfforts = new Dictionary<Class, int>();
             if (StudentTimetables.Count != StudentEfforts.Count || StudentTimetables[0].StudentID != StudentEfforts[0].StudentID)
             {
                 var Result = MessageBox.Show("The Student TimeTables & Student Efforts Don't Match, I Can Continue, But Things May Get Weird, Is That Okay?\n\nPlease Tell Johnathon!", "Offset Mismatch", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (Result == DialogResult.No)
                     return;
             }
-            //They are the same size, each index should be the same student.... I hope
-            for (int Student = 0; Student < StudentEfforts.Count; Student++)
+
+            foreach (var StudentTimetable in StudentTimetables)
             {
-                if (StudentEfforts[Student].StudentID != StudentTimetables[Student].StudentID)
+                foreach (var Day in StudentTimetable.Week.Days)
                 {
-                    Log($"{StudentEfforts[Student].StudentID} Doesn't Match {StudentTimetables[Student].StudentID}");
-                    continue;
-                }
+                    foreach (var TimetableClass in Day.Classes)
+                    {
+                        foreach (var StudentEffort in StudentEfforts)
+                        {
+                            foreach (var StudentSubject in StudentEffort.StudentSubjects)
+                            {
+                                if (TimetableClass.Name == StudentEffort.StudentFormClass)
+                                    continue;
 
-                foreach (var Subject in StudentEfforts[Student].StudentSubjects)
-                {
-                    //Class Has Effort, We're Looking For Ones That Don't
-                    if (Subject.SubjectEffort1 != 0)
-                        continue;
-                    if (Subject.SubjectName == StudentEfforts[Student].StudentFormClass)
-                        continue;
+                                if (StudentSubject.SubjectName == TimetableClass.Name)
+                                {
+                                    if (StudentSubject.SubjectEffort1 == 0)
+                                    {
+                                        if (ClassesWithNoEfforts.ContainsKey(TimetableClass))
+                                        {
+                                            ClassesWithNoEfforts[TimetableClass] = ClassesWithNoEfforts[TimetableClass] + 1;
+                                            continue;
+                                        }
 
-                    var DaysWithNoEfforts = StudentTimetables[Student].Week.Days.Where(Day => Day.Classes.Any(Class => Class.Name == Subject.SubjectName));
-                    foreach(Day Day in DaysWithNoEfforts)
-                        foreach(Class Class in Day.Classes)
-                            MissingEfforts.Add(Class, StudentTimetables[Student])
+                                        ClassesWithNoEfforts.Add(TimetableClass, 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
 
-        private void Log(string Message)
-        {
-            File.AppendAllText("Burgundy.log", $"[{DateTime.Now.TimeOfDay}]: {Message}");
+            foreach(var ClassWithNoEfforts in ClassesWithNoEfforts)
+            {
+                File.AppendAllText("Efforts.txt", $"Teacher: {ClassWithNoEfforts.Key.Teacher} Class: {ClassWithNoEfforts.Key.Name} Missed: {ClassWithNoEfforts.Value} Efforts\n");
+            }
         }
     }
 }
