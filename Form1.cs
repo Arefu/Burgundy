@@ -23,8 +23,7 @@ namespace Burgundy
             StudentTimetables = new List<Timetable>();
             StudentEfforts = new List<Student>();
 
-            if (File.Exists("Burgundy.log"))
-                File.Delete("Burgundy.log");
+            ignoreClasses.Text = "SLC,FLT";
         }
 
         private void Load_TT_Click(object sender, EventArgs e)
@@ -102,7 +101,7 @@ namespace Burgundy
 
         private void Process_Click(object sender, EventArgs e)
         {
-            Dictionary<Class, int> ClassesWithNoEfforts = new Dictionary<Class, int>();
+            Dictionary<Subject, int> ClassesWithNoEfforts = new Dictionary<Subject, int>();
             if (StudentTimetables.Count != StudentEfforts.Count || StudentTimetables[0].StudentID != StudentEfforts[0].StudentID)
             {
                 var Result = MessageBox.Show("The Student TimeTables & Student Efforts Don't Match, I Can Continue, But Things May Get Weird, Is That Okay?\n\nPlease Tell Johnathon!", "Offset Mismatch", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -110,41 +109,39 @@ namespace Burgundy
                     return;
             }
 
-            foreach (var StudentTimetable in StudentTimetables)
+            for(int Student = 0; Student < StudentEfforts.Count; Student++)
             {
-                foreach (var Day in StudentTimetable.Week.Days)
+                if(StudentEfforts[Student].StudentID == StudentTimetables[Student].StudentID) //Same Kid
                 {
-                    foreach (var TimetableClass in Day.Classes)
+                    foreach(var TimeTableClass in StudentTimetables[Student].Classes)
                     {
-                        foreach (var StudentEffort in StudentEfforts)
+                        if (TimeTableClass.Name == StudentTimetables[Student].FormClass || TimeTableClass.Name == StudentEfforts[Student].FormClass)
+                            continue;
+                        if (ignoreClasses.Text.ToUpper().Split(',').Any(Item => TimeTableClass.Name?.ToUpper().Contains(Item) ?? false))
+                            continue;
+                        if (TimeTableClass.Name == null)
+                            continue;
+
+                        foreach (var EffortClass in StudentEfforts[Student].StudentSubjects)
                         {
-                            foreach (var StudentSubject in StudentEffort.StudentSubjects)
-                            {
-                                if (TimetableClass.Name == StudentEffort.StudentFormClass)
-                                    continue;
+                            if (EffortClass.SubjectName != TimeTableClass.Name && EffortClass.SubjectTeacher != TimeTableClass.Teacher)
+                                continue;
+                            if (EffortClass.SubjectEffort1 != 0)
+                                continue;
+                            if (ignoreClasses.Text.ToUpper().Split(',').Any(Item => EffortClass.SubjectName?.ToUpper().Contains(Item) ?? false))
+                                continue;
 
-                                if (StudentSubject.SubjectName == TimetableClass.Name)
-                                {
-                                    if (StudentSubject.SubjectEffort1 == 0)
-                                    {
-                                        if (ClassesWithNoEfforts.ContainsKey(TimetableClass))
-                                        {
-                                            ClassesWithNoEfforts[TimetableClass] = ClassesWithNoEfforts[TimetableClass] + 1;
-                                            continue;
-                                        }
-
-                                        ClassesWithNoEfforts.Add(TimetableClass, 1);
-                                    }
-                                }
-                            }
+                            MessageBox.Show($"{StudentEfforts[Student].StudentID} {EffortClass.SubjectName}-{TimeTableClass.Name} {EffortClass.SubjectTeacher} {EffortClass.SubjectEffort1}");
                         }
                     }
                 }
             }
 
-            foreach(var ClassWithNoEfforts in ClassesWithNoEfforts)
+            ClassesWithNoEfforts = ClassesWithNoEfforts.OrderBy(Class => Class.Key).ToDictionary(Key => Key.Key, Value => Value.Value);
+
+            foreach (var ClassWithNoEfforts in ClassesWithNoEfforts)
             {
-                File.AppendAllText("Efforts.txt", $"Teacher: {ClassWithNoEfforts.Key.Teacher} Class: {ClassWithNoEfforts.Key.Name} Missed: {ClassWithNoEfforts.Value} Efforts\n");
+                File.AppendAllText("Efforts.txt", $"Teacher: {ClassWithNoEfforts.Key.SubjectTeacher} Class: {ClassWithNoEfforts.Key.SubjectName} Missed: {ClassWithNoEfforts.Value} Efforts\n");
             }
         }
     }

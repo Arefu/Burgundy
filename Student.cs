@@ -15,7 +15,7 @@ namespace Burgundy
         internal DateTime StudentBirthday;
         internal int Year;
         //Ignore This When Checking Efforts!
-        internal string StudentFormClass;
+        internal string FormClass;
         internal DateTime ReportWeekStart;
 
         internal List<Subject> StudentSubjects;
@@ -28,7 +28,7 @@ namespace Burgundy
             this.Gender = Convert.ToChar(Student[3]);
             this.StudentBirthday = Convert.ToDateTime(Student[4]);
             this.Year = Convert.ToInt32(Student[5]);
-            this.StudentFormClass = Student[6];
+            this.FormClass = Student[6];
             this.ReportWeekStart = Convert.ToDateTime(Student[7]);
 
             this.StudentSubjects = new List<Subject>();
