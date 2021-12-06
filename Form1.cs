@@ -23,7 +23,9 @@ namespace Burgundy
             StudentTimetables = new List<Timetable>();
             StudentEfforts = new List<Student>();
 
-            ignoreClasses.Text = "SLC,FLT";
+            ignoreClasses.Text = "SLC,FLT,HOME,Catchup";
+            if (File.Exists("Missed Efforts.txt"))
+                File.Delete("Missed Efforts.txt");
         }
 
         private void Load_TT_Click(object sender, EventArgs e)
@@ -90,6 +92,9 @@ namespace Burgundy
                             var Subject = new Subject(Efforts.Take(5).ToList());
                             Efforts.RemoveRange(0, 5);
                             Student.AddClass(Subject);
+
+                            if (!Student.AllSubjects.Contains(Subject))
+                                Student.AllSubjects.Add(Subject);
                         }
                         StudentEfforts.Add(Student);
                     }
@@ -109,40 +114,44 @@ namespace Burgundy
                     return;
             }
 
-            for(int Student = 0; Student < StudentEfforts.Count; Student++)
+            for (int i = 0; i < Student.AllSubjects.Count; i++)
             {
-                if(StudentEfforts[Student].StudentID == StudentTimetables[Student].StudentID) //Same Kid
+                Subject Subject = Student.AllSubjects[i];
+                if (Subject.SubjectEffort1 != 0)
+                    Student.AllSubjects.Remove(Subject);
+                if (ignoreClasses.Text.Split(',').Any(ignore => Subject.SubjectName.ToUpper().Contains(ignore.ToUpper())))
+                    Student.AllSubjects.Remove(Subject);
+            }
+
+            Student.AllSubjects = Student.AllSubjects.OrderBy(Subject => Subject.SubjectTeacher).ToList();
+            List<string> DoneClasses = new List<string>();
+
+            this.Text = "Working...";
+            foreach (var Effort in Student.AllSubjects)
+            {
+                foreach (var StudentTimetable in StudentTimetables)
                 {
-                    foreach(var TimeTableClass in StudentTimetables[Student].Classes)
+                    foreach (var Class in StudentTimetable.Classes)
                     {
-                        if (TimeTableClass.Name == StudentTimetables[Student].FormClass || TimeTableClass.Name == StudentEfforts[Student].FormClass)
+                        if (Class.Name == null)
                             continue;
-                        if (ignoreClasses.Text.ToUpper().Split(',').Any(Item => TimeTableClass.Name?.ToUpper().Contains(Item) ?? false))
+                        if (Class.Name == StudentTimetable.FormClass)
                             continue;
-                        if (TimeTableClass.Name == null)
+                        if (ignoreClasses.Text.Split(',').Any(ignore => Class.Name.ToUpper().Contains(ignore.ToUpper())))
                             continue;
 
-                        foreach (var EffortClass in StudentEfforts[Student].StudentSubjects)
+                        if (Class.Name == Effort.SubjectName && Class.Teacher == Effort.SubjectTeacher)
                         {
-                            if (EffortClass.SubjectName != TimeTableClass.Name && EffortClass.SubjectTeacher != TimeTableClass.Teacher)
-                                continue;
-                            if (EffortClass.SubjectEffort1 != 0)
-                                continue;
-                            if (ignoreClasses.Text.ToUpper().Split(',').Any(Item => EffortClass.SubjectName?.ToUpper().Contains(Item) ?? false))
-                                continue;
-
-                            MessageBox.Show($"{StudentEfforts[Student].StudentID} {EffortClass.SubjectName}-{TimeTableClass.Name} {EffortClass.SubjectTeacher} {EffortClass.SubjectEffort1}");
+                            if (DoneClasses.Contains($"{Class.Name}-{Class.Teacher}") == false)
+                            {
+                                File.AppendAllText("Missed Efforts.txt", $"{Class.Name} Missed By {Class.Teacher}\n");
+                                DoneClasses.Add($"{Class.Name}-{Class.Teacher}");
+                            }
                         }
                     }
                 }
             }
-
-            ClassesWithNoEfforts = ClassesWithNoEfforts.OrderBy(Class => Class.Key).ToDictionary(Key => Key.Key, Value => Value.Value);
-
-            foreach (var ClassWithNoEfforts in ClassesWithNoEfforts)
-            {
-                File.AppendAllText("Efforts.txt", $"Teacher: {ClassWithNoEfforts.Key.SubjectTeacher} Class: {ClassWithNoEfforts.Key.SubjectName} Missed: {ClassWithNoEfforts.Value} Efforts\n");
-            }
+            this.Text = "";
         }
     }
 }
