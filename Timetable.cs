@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Burgundy
 {
-    internal class Class
+    internal class Class : IEquatable<Class>
     {
         internal string Code;
         internal string Name;
@@ -24,10 +24,27 @@ namespace Burgundy
             this.Room = Class[3];
             this.Teacher = Class[2];
         }
+
+        public bool Equals(Class other)
+        {
+            return other.Name == this.Name && other.Teacher == this.Teacher && other.Room == this.Room;
+        }
+        public override int GetHashCode()
+        {
+            if (this.Name == null) return 0;
+            return Name.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Class other && other.Name == this.Name && other.Teacher == this.Teacher && other.Room == this.Room && other.Code == this.Code;
+        }
     }
 
     internal class Timetable
     {
+        internal static List<Class> AllSubjects = new List<Class>();
+
         internal int StudentID;
         internal string Surname;
         internal string FirstName;
@@ -86,6 +103,12 @@ namespace Burgundy
             Classes.Add(new Class(Data[52]));
             Classes.Add(new Class(Data[53]));
             Classes.Add(new Class(Data[55]));
+
+            foreach (var Class in this.Classes)
+            {
+                if (Timetable.AllSubjects.Contains(Class) == false)
+                    AllSubjects.Add(Class);
+            }
         }
     }
 }

@@ -124,9 +124,11 @@ namespace Burgundy
             }
 
             Student.AllSubjects = Student.AllSubjects.OrderBy(Subject => Subject.SubjectTeacher).ToList();
-            List<string> DoneClasses = new List<string>();
+            Dictionary<Class, int> DoneClasses = new Dictionary<Class, int>();
+            List<MissedEffort> Missed = new List<MissedEffort>();
 
             this.Text = "Working...";
+            
             foreach (var Effort in Student.AllSubjects)
             {
                 foreach (var StudentTimetable in StudentTimetables)
@@ -140,18 +142,51 @@ namespace Burgundy
                         if (ignoreClasses.Text.Split(',').Any(ignore => Class.Name.ToUpper().Contains(ignore.ToUpper())))
                             continue;
 
-                        if (Class.Name == Effort.SubjectName && Class.Teacher == Effort.SubjectTeacher)
+
+                        if (Class.Name == Effort.SubjectName && Class.Teacher.Split('/').Any(Teacher => Effort.SubjectTeacher == Teacher))
                         {
-                            if (DoneClasses.Contains($"{Class.Name}-{Class.Teacher}") == false)
+                            if (DoneClasses.ContainsKey(Class) == false)
                             {
-                                File.AppendAllText("Missed Efforts.txt", $"{Class.Name} Missed By {Class.Teacher}\n");
-                                DoneClasses.Add($"{Class.Name}-{Class.Teacher}");
+                                DoneClasses.Add(Class, 1);
+                                Missed.Add(new MissedEffort(Class, $"{StudentTimetable.FirstName} {StudentTimetable.Surname}", 1));
+                            }
+                            else
+                            {
+                                DoneClasses[Class] = DoneClasses[Class] + 1;
                             }
                         }
                     }
                 }
             }
+
+            DoneClasses = DoneClasses.OrderBy(Class => Class.Key.Teacher).ToDictionary(Key => Key.Key, Value => Value.Value);
+            foreach(var Class in DoneClasses)
+            {
+                File.AppendAllText("Missed Efforts.txt", $"{Class.Key.Name}-{Class.Key.Teacher} Missed  {Class.Value} Efforts\n");
+            }
             this.Text = "";
+        }
+
+        class MissedEffort
+        {
+            Class Class;
+            String Name;
+            int NumberOfMissed;
+
+            public MissedEffort(Class Class, string Name, int Number)
+            {
+                this.Class = Class;
+                this.Name = Name;
+                this.NumberOfMissed = Number;
+            }
+
+            public void AddToMissed(Class Class, string Name)
+            {
+                if(this.Class == Class && this.Name == Name)
+                {
+                    NumberOfMissed = NumberOfMissed + 1;
+                }
+            }
         }
     }
 }
